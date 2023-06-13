@@ -91,6 +91,20 @@ async function run() {
         res.send(result)
     })
 
+    app.put('/classes/:id', async(req, res) =>{
+        const id = req.params.id;
+        const filter = {_id: new ObjectId(id)};
+        const getFeedback = req.body;
+        console.log(getFeedback);
+        const updateDoc = {
+            $set: {
+                feedback: getFeedback.feedback
+            }
+        }
+        const result = await classesCollection.updateOne(filter, updateDoc);
+        res.send(result)
+    })
+
 
 
 
