@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 //middleware
@@ -27,6 +28,7 @@ async function run() {
         const usersCollection = client.db("SummerCampDB").collection("users");
         const classesCollection = client.db("SummerCampDB").collection("classes");
         const selectedClassesCollection = client.db("SummerCampDB").collection("selected_classes");
+        const paymentCollection = client.db("SummerCampDB").collection("payments");
 
 
 
@@ -168,17 +170,17 @@ async function run() {
 
 
         //selected_class collection apis
-        app.get('/selected_classes', async(req, res) =>{
+        app.get('/selected_classes', async (req, res) => {
             // const email = req.query.email;
             // if(!email){
             //     res.send([])
             // }
-    
+
             // const decodedEmail = req.decoded.email;
             // if(email !== decodedEmail){
             //     return res.status(401).send({error: true, message: 'Forbidden access!'})
             // }
-    
+
             // else{
             //     const query = { email: email };
             //     const result = await cartCollection.find(query).toArray();
@@ -189,7 +191,7 @@ async function run() {
                 query = { email: req.query.email }
             }
             const result = await selectedClassesCollection.find(query).toArray();
-                res.send(result);
+            res.send(result);
         })
 
         app.post('/selected_classes', async (req, res) => {
@@ -197,6 +199,31 @@ async function run() {
             console.log(selected_class);
             const result = await selectedClassesCollection.insertOne(selected_class);
             res.send(result);
+        })
+
+        // create payment intent
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card'],
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
+
+        //payment related apis
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const insertResult = await paymentCollection.insertOne(payment);
+            const id = payment.selectedClassId;
+            const query = { _id:  new ObjectId(id)}
+            const deleteResult = await selectedClassesCollection.deleteOne(query);
+            res.send({ insertResult, deleteResult });
+            //res.send({ insertResult });
         })
 
 
