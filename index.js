@@ -110,6 +110,12 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/classes/approved_classes', async (req, res) => {
+            const query = { status: 'Approved' };
+            const result = await classesCollection.find(query).toArray();
+            res.send(result);
+        })
+
 
         app.get('/classes/:id', async (req, res) => {
             const id = req.params.id;
