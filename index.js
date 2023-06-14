@@ -184,7 +184,11 @@ async function run() {
             //     const result = await cartCollection.find(query).toArray();
             //     res.send(result);
             // }
-            const result = await selectedClassesCollection.find().toArray();
+            let query = {};
+            if (req.query?.email) {
+                query = { email: req.query.email }
+            }
+            const result = await selectedClassesCollection.find(query).toArray();
                 res.send(result);
         })
 
