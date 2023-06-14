@@ -26,6 +26,7 @@ async function run() {
 
         const usersCollection = client.db("SummerCampDB").collection("users");
         const classesCollection = client.db("SummerCampDB").collection("classes");
+        const selectedClassesCollection = client.db("SummerCampDB").collection("selected_classes");
 
 
 
@@ -162,7 +163,14 @@ async function run() {
         })
 
 
+        //selected_class collection apis
 
+        app.post('/selected_classes', async (req, res) => {
+            const selected_lass = req.body;
+            console.log(selected_lass);
+            const result = await cartCollection.insertOne(selected_lass);
+            res.send(result);
+        })
 
 
 
