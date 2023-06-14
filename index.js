@@ -223,6 +223,15 @@ async function run() {
         })
 
         //payment related apis
+        app.get('/payments', async (req, res) => {
+            let query = {};
+            if (req.query?.email) {
+                query = { email: req.query.email }
+            }
+            const result = await paymentCollection.find(query).toArray();
+            res.send(result);
+        })
+
         app.post('/payments', async (req, res) => {
             const payment = req.body;
             const insertResult = await paymentCollection.insertOne(payment);
